@@ -5,6 +5,7 @@
   const GITHUB_ORIGIN = "https://github.com";
   const toolbars = new Map();
   let pageContext = {};
+  let pageStartIndex = 1;
   let diagrams = [];
 
   function notifyParent(message) {
@@ -38,7 +39,7 @@
   }
 
   function diagramIndex(svg) {
-    return Math.max(1, diagrams.indexOf(svg) + 1);
+    return Math.max(1, pageStartIndex + diagrams.indexOf(svg));
   }
 
   function positionToolbars() {
@@ -110,19 +111,26 @@
     setTimeout(() => toast.remove(), 5000);
   }
 
-  function showError(error) {
+  function showError(error, requestId) {
     const message = error?.message || String(error);
     console.error("GitHub Mermaid Exporter:", error);
     showToast(message, true);
-    notifyParent({ type: "gme:error", error: message });
+    notifyParent({ type: "gme:error", error: message, requestId });
   }
 
   window.addEventListener("message", (event) => {
     if (event.origin !== GITHUB_ORIGIN || event.source !== window.parent || event.data?.source !== "github-mermaid-exporter") return;
-    if (event.data.type === "gme:context") pageContext = event.data.context || {};
+    if (event.data.type === "gme:context") {
+      pageContext = event.data.context || {};
+      pageStartIndex = Math.max(1, Number(event.data.startIndex) || 1);
+    }
     if (event.data.type === "gme:ping") notifyParent({ type: "gme:ready", count: diagrams.length });
     if (event.data.type === "gme:export-all") {
-      exportAll(Math.max(1, Number(event.data.startIndex) || 1), event.data.context).catch(showError);
+      const requestId = event.data.requestId;
+      exportAll(Math.max(1, Number(event.data.startIndex) || 1), event.data.context).then(
+        () => notifyParent({ type: "gme:export-complete", requestId }),
+        (error) => showError(error, requestId)
+      );
     }
   });
 

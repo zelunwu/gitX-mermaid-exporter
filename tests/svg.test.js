@@ -25,12 +25,12 @@ test("serializes the rendered SVG, viewBox, text, color, and computed style", ()
   const exported = parsed.window.document.documentElement;
   assert.equal(exported.namespaceURI, SVG_NS);
   assert.equal(exported.getAttribute("viewBox"), "-8 -4 208 108");
-  assert.equal(exported.getAttribute("width"), "208");
-  assert.equal(exported.getAttribute("height"), "108");
+  assert.equal(exported.getAttribute("width"), "416");
+  assert.equal(exported.getAttribute("height"), "216");
   assert.match(exported.textContent, /Private diagram text/);
   assert.match(exported.getAttribute("style") || "", /color/);
-  assert.equal(result.width, 208);
-  assert.equal(result.height, 108);
+  assert.equal(result.width, 416);
+  assert.equal(result.height, 216);
 });
 
 test("adds dimensions and viewBox when GitHub SVG omits them", () => {
@@ -47,6 +47,7 @@ test("uses a padded content box to avoid clipping when viewBox is absent", () =>
   const dom = svgDocument(`<svg><path d="M-5 -5L100 40"/></svg>`);
   const source = dom.window.document.querySelector("svg");
   source.getBBox = () => ({ x: -5, y: -5, width: 105, height: 45 });
+  source.getBoundingClientRect = () => ({ width: 0, height: 0 });
   const result = svgApi.serializeSvg(source, { inlineStyles: false });
   assert.match(result.text, /viewBox="-7 -7 109 49"/);
   assert.equal(result.width, 109);

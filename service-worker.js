@@ -33,23 +33,31 @@ chrome.action.onClicked.addListener(async (tab) => {
 });
 
 chrome.downloads.onChanged.addListener((delta) => {
-  if (!delta.id || !pendingDownloads.has(delta.id)) return;
+  handleDownloadChanged(delta).catch(() => undefined);
+});
+
+async function handleDownloadChanged(delta) {
+  if (!delta.id) return;
   if (delta.state?.current === "complete") {
     pendingDownloads.delete(delta.id);
     return;
   }
   if (delta.error?.current || delta.state?.current === "interrupted") {
     const target = pendingDownloads.get(delta.id);
-    pendingDownloads.delete(delta.id);
-    if (target?.tabId != null) {
-      chrome.tabs.sendMessage(
-        target.tabId,
-        { type: "gme:download-failed", error: delta.error?.current || "Download interrupted" },
-        target.frameId != null ? { frameId: target.frameId } : undefined
-      ).catch(() => undefined);
+    if (!target) {
+      const [item] = await chrome.downloads.search({ id: delta.id });
+      if (item?.byExtensionId !== chrome.runtime.id) return;
     }
+    pendingDownloads.delete(delta.id);
+    const error = delta.error?.current || "Download interrupted";
+    if (target?.tabId != null) {
+      chrome.tabs.sendMessage(target.tabId, { type: "gme:download-failed", error }).catch(() => undefined);
+    }
+    // onChanged wakes a restarted MV3 worker. A global badge still exposes the failure if
+    // the in-memory sender map was lost or SPA navigation removed the original frame.
+    showActionError(target?.tabId, error).catch(() => undefined);
   }
-});
+}
 
 async function startDownload(message, sender) {
   try {
@@ -71,10 +79,10 @@ async function startDownload(message, sender) {
 }
 
 async function showActionError(tabId, message) {
-  if (tabId == null) return;
-  await chrome.action.setBadgeBackgroundColor({ tabId, color: "#cf222e" });
-  await chrome.action.setBadgeText({ tabId, text: "ERR" });
-  await chrome.action.setTitle({ tabId, title: `GitHub Mermaid Exporter: ${message}` });
+  const target = tabId == null ? {} : { tabId };
+  await chrome.action.setBadgeBackgroundColor({ ...target, color: "#cf222e" });
+  await chrome.action.setBadgeText({ ...target, text: "ERR" });
+  await chrome.action.setTitle({ ...target, title: `GitHub Mermaid Exporter: ${message}` });
   setTimeout(() => clearActionState(tabId), 5000);
 }
 
@@ -86,6 +94,7 @@ async function showActionSuccess(tabId, count) {
 }
 
 function clearActionState(tabId) {
-  chrome.action.setBadgeText({ tabId, text: "" }).catch(() => undefined);
-  chrome.action.setTitle({ tabId, title: "Export all Mermaid diagrams as SVG" }).catch(() => undefined);
+  const target = tabId == null ? {} : { tabId };
+  chrome.action.setBadgeText({ ...target, text: "" }).catch(() => undefined);
+  chrome.action.setTitle({ ...target, title: "Export all Mermaid diagrams as SVG" }).catch(() => undefined);
 }

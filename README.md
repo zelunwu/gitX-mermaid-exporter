@@ -43,6 +43,7 @@
 ```sh
 npm install
 npm run verify
+npm run test:chromium
 npm run package
 ```
 
@@ -52,7 +53,7 @@ npm run package
 
 - 仅支持 `github.com`，暂不支持 GitHub Enterprise Server 或其他站点。
 - GitHub 若改变 Viewscreen iframe 域名或 DOM 结构，选择器可能需要更新。
-- 2× PNG 使用 SVG 的 `viewBox` 尺寸（缺失时使用实际渲染尺寸），并填充 Viewscreen 当前背景。极端超大图可能触及浏览器 Canvas 尺寸/内存上限。
+- 2× PNG 优先使用页面实际渲染尺寸（不可用时回退到固有尺寸或 `viewBox`），并填充 Viewscreen 当前背景。极端超大图可能触及浏览器 Canvas 尺寸/内存上限。
 - 自动 fixture 覆盖延迟 SVG、多图、明暗背景、仅 `viewBox`/缺失尺寸、SPA 导航和 iframe 替换。发布前仍需在用户已登录的真实 private GitHub 仓库中人工确认：单图 SVG、单图 PNG、批量导出、主题切换、导航后再次导出、文件可重开且不含扩展按钮。自动测试不会冒充这一项真实验收。
 
 ### Buy me a coffee / 请我喝咖啡
@@ -104,6 +105,7 @@ Node.js 20+ is required:
 ```sh
 npm install
 npm run verify
+npm run test:chromium
 npm run package
 ```
 
@@ -113,7 +115,7 @@ The release archive is written to `dist/github-mermaid-exporter-v0.1.0.zip` and 
 
 - Only `github.com` is supported; GitHub Enterprise Server and other hosts are out of scope.
 - A future GitHub change to the Viewscreen origin or DOM may require selector updates.
-- PNG uses 2× the SVG `viewBox` dimensions (or rendered dimensions when absent) and the current Viewscreen background. Extremely large diagrams can hit browser Canvas memory/size limits.
+- PNG uses 2× the current rendered dimensions (falling back to intrinsic dimensions or `viewBox`) and the current Viewscreen background. Extremely large diagrams can hit browser Canvas memory/size limits.
 - Automated fixtures cover delayed SVGs, multiple diagrams, dark/light backgrounds, viewBox-only or missing dimensions, SPA navigation, and iframe replacement. Before release, manually verify in a real, signed-in private GitHub repository: single SVG, single PNG, batch SVG, theme switching, export after navigation, reparsing the files, and absence of extension controls. Fixture coverage is not claimed as real private-GitHub acceptance.
 
 ### Buy me a coffee
