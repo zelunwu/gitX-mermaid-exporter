@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "GitHub Mermaid Exporter",
-  "version": "0.1.0",
+  "name": "gitX Mermaid Exporter",
+  "version": "0.2.0",
   "description": "Export Mermaid diagrams exactly as rendered by GitHub Viewscreen.",
   "permissions": [
     "downloads"
@@ -14,12 +14,13 @@
     "service_worker": "service-worker.js"
   },
   "action": {
-    "default_title": "Export all Mermaid diagrams as SVG"
+    "default_title": "Choose Mermaid diagrams to export"
   },
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
       "js": ["lib/filename.js", "lib/page.js", "content/github.js"],
+      "css": ["content/github.css"],
       "run_at": "document_idle"
     },
     {

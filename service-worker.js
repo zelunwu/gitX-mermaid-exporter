@@ -2,7 +2,7 @@
 
 importScripts("lib/filename.js");
 
-const API = globalThis.GitHubMermaidExporter;
+const API = globalThis.GitXMermaidExporter;
 const pendingDownloads = new Map();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -21,7 +21,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   }
 
   try {
-    const response = await chrome.tabs.sendMessage(tab.id, { type: "gme:export-all" });
+    const response = await chrome.tabs.sendMessage(tab.id, { type: "gme:open-picker" });
     if (!response?.ok) {
       await showActionError(tab.id, response?.error || "No Mermaid diagrams found");
       return;
@@ -82,19 +82,19 @@ async function showActionError(tabId, message) {
   const target = tabId == null ? {} : { tabId };
   await chrome.action.setBadgeBackgroundColor({ ...target, color: "#cf222e" });
   await chrome.action.setBadgeText({ ...target, text: "ERR" });
-  await chrome.action.setTitle({ ...target, title: `GitHub Mermaid Exporter: ${message}` });
+  await chrome.action.setTitle({ ...target, title: `gitX Mermaid Exporter: ${message}` });
   setTimeout(() => clearActionState(tabId), 5000);
 }
 
 async function showActionSuccess(tabId, count) {
   await chrome.action.setBadgeBackgroundColor({ tabId, color: "#1a7f37" });
   await chrome.action.setBadgeText({ tabId, text: String(count || "✓") });
-  await chrome.action.setTitle({ tabId, title: `Started ${count} Mermaid SVG download(s)` });
+  await chrome.action.setTitle({ tabId, title: `Choose from ${count} Mermaid diagram(s)` });
   setTimeout(() => clearActionState(tabId), 3000);
 }
 
 function clearActionState(tabId) {
   const target = tabId == null ? {} : { tabId };
   chrome.action.setBadgeText({ ...target, text: "" }).catch(() => undefined);
-  chrome.action.setTitle({ ...target, title: "Export all Mermaid diagrams as SVG" }).catch(() => undefined);
+  chrome.action.setTitle({ ...target, title: "Choose Mermaid diagrams to export" }).catch(() => undefined);
 }

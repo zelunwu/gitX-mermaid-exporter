@@ -1,0 +1,67 @@
+[data-gme-picker] {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(31, 35, 40, 0.45);
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.gme-picker-dialog {
+  width: min(520px, 100%);
+  max-height: min(680px, calc(100vh - 40px));
+  overflow: hidden;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 12px;
+  background: var(--bgColor-default, #fff);
+  color: var(--fgColor-default, #1f2328);
+  box-shadow: 0 16px 48px rgba(31, 35, 40, 0.3);
+}
+
+.gme-picker-dialog header,
+.gme-picker-dialog footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+}
+
+.gme-picker-dialog header { border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
+.gme-picker-dialog footer { border-top: 1px solid var(--borderColor-muted, #d8dee4); justify-content: flex-end; }
+.gme-picker-dialog h2 { margin: 0; font-size: 18px; }
+.gme-picker-dialog p { margin: 3px 0 0; color: var(--fgColor-muted, #656d76); }
+.gme-picker-close { border: 0; background: transparent; color: inherit; font-size: 24px; cursor: pointer; }
+.gme-picker-list { max-height: 420px; overflow: auto; padding: 8px 16px; }
+
+.gme-picker-row {
+  display: grid;
+  grid-template-columns: auto 1fr 120px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
+}
+
+.gme-picker-row:last-child { border-bottom: 0; }
+.gme-picker-row input { width: 16px; height: 16px; }
+.gme-picker-row select,
+.gme-picker-dialog footer button {
+  min-height: 32px;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 6px;
+  padding: 5px 10px;
+  background: var(--button-default-bgColor-rest, #f6f8fa);
+  color: inherit;
+}
+
+.gme-picker-export { background: var(--button-primary-bgColor-rest, #1f883d) !important; color: #fff !important; cursor: pointer; }
+.gme-picker-cancel { cursor: pointer; }
+.gme-page-toast {
+  position: fixed; right: 16px; bottom: 16px; z-index: 2147483647;
+  padding: 10px 12px; border-radius: 6px; background: #1f883d; color: white;
+  font: 13px system-ui;
+}
+.gme-page-error { background: #cf222e; }

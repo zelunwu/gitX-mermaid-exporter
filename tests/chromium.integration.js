@@ -32,7 +32,8 @@ function fixturePage() {
 
 function viewscreenPage(delayed) {
   const svg = `<div class="mermaid"><svg viewBox="0 0 100 50" style="display:block;width:240px;height:120px;color:rgb(201,209,217)">
-    <rect x="10" y="10" width="80" height="30" fill="rgb(31,111,235)"/><text x="12" y="28" fill="currentColor">GitHub native fixture</text>
+    <rect x="10" y="10" width="80" height="30" fill="rgb(31,111,235)"/>
+    <foreignObject x="12" y="14" width="76" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="color:rgb(201,209,217);font:8px sans-serif">GitHub native fixture</div></foreignObject>
   </svg></div>`;
   return `<!doctype html><html data-color-mode="dark"><body style="margin:0;background:rgb(13,17,23)">
     ${delayed ? `<script>setTimeout(() => document.body.insertAdjacentHTML("beforeend", ${JSON.stringify(svg)}), 400)</script>` : svg}
@@ -103,6 +104,9 @@ async function main() {
     assert.equal(frames.length, 2);
     await first.locator(".gme-toolbar").waitFor();
     await second.locator(".gme-toolbar").waitFor();
+    const svgBounds = await first.locator("svg").boundingBox();
+    const toolbarBounds = await first.locator(".gme-toolbar").boundingBox();
+    assert.ok(toolbarBounds.x >= svgBounds.x && toolbarBounds.x <= svgBounds.x + 12, "toolbar should be at the upper-left");
 
     const worker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker");
     await first.getByRole("button", { name: "SVG" }).click();
@@ -126,17 +130,23 @@ async function main() {
     const decodedPng = PNG.sync.read(png);
     assert.deepEqual([...decodedPng.data.subarray(0, 4)], [13, 17, 23, 255]);
 
-    const batch = await worker.evaluate(async () => {
+    const picker = await worker.evaluate(async () => {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      return chrome.tabs.sendMessage(tab.id, { type: "gme:export-all" });
+      return chrome.tabs.sendMessage(tab.id, { type: "gme:open-picker" });
     });
-    assert.deepEqual(batch, { ok: true, count: 2 });
+    assert.deepEqual(picker, { ok: true, count: 2 });
+    await page.locator("[data-gme-picker]").waitFor();
+    assert.equal((await worker.evaluate(async () => chrome.downloads.search({}))).length, 3, "opening the picker must not download");
+    const pickerRows = page.locator(".gme-picker-row");
+    assert.equal(await pickerRows.count(), 2);
+    await pickerRows.nth(1).locator("select").selectOption("png");
+    await page.getByRole("button", { name: "Export selected" }).click();
     downloads = await waitForDownloads(worker, 5);
     const svgTexts = downloads
       .map((item) => fs.readFileSync(item.filename))
       .filter((data) => data.subarray(0, 5).toString("utf8") === "<?xml")
       .map((data) => data.toString("utf8"));
-    assert.equal(svgTexts.length, 4);
+    assert.equal(svgTexts.length, 3);
     for (const text of svgTexts) {
       const parsed = new JSDOM(text, { contentType: "image/svg+xml" });
       assert.equal(parsed.window.document.documentElement.localName, "svg");
@@ -144,7 +154,11 @@ async function main() {
       assert.equal(text.includes("gme-toolbar"), false);
       assert.equal(text.includes("PNG 2×"), false);
     }
-    console.log("Chromium MV3 integration: SVG, PNG 2×, batch, reparsing, and UI exclusion passed");
+    const pngBuffers = downloads
+      .map((item) => fs.readFileSync(item.filename))
+      .filter((data) => data.subarray(1, 4).toString("ascii") === "PNG");
+    assert.equal(pngBuffers.length, 2);
+    console.log("Chromium MV3 integration: foreignObject PNG, upper-left controls, picker, mixed formats, reparsing, and UI exclusion passed");
   } finally {
     if (context) await context.close();
     await new Promise((resolve) => server.close(resolve));

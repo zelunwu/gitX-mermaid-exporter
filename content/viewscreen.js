@@ -1,7 +1,8 @@
 (function viewscreenContentScript() {
   "use strict";
 
-  const API = globalThis.GitHubMermaidExporter;
+  const API = globalThis.GitXMermaidExporter;
+  const CHANNEL = "gitx-mermaid-exporter";
   const GITHUB_ORIGIN = "https://github.com";
   const toolbars = new Map();
   let pageContext = {};
@@ -10,7 +11,7 @@
 
   function notifyParent(message) {
     if (window.parent !== window) {
-      window.parent.postMessage({ source: "github-mermaid-exporter", ...message }, GITHUB_ORIGIN);
+      window.parent.postMessage({ source: CHANNEL, ...message }, GITHUB_ORIGIN);
     }
   }
 
@@ -51,7 +52,7 @@
       }
       const bounds = svg.getBoundingClientRect();
       toolbar.style.top = `${Math.max(6, bounds.top + window.scrollY + 6)}px`;
-      toolbar.style.left = `${Math.max(6, bounds.right + window.scrollX - toolbar.offsetWidth - 6)}px`;
+      toolbar.style.left = `${Math.max(6, bounds.left + window.scrollX + 6)}px`;
       const background = API.png.backgroundFor(svg);
       toolbar.dataset.theme = /rgb\((?:[0-9]|[1-8][0-9]),/.test(background) ? "dark" : "light";
     }
@@ -92,12 +93,14 @@
     showToast(`Download started: ${filename}`);
   }
 
-  async function exportAll(startIndex, context) {
+  async function exportSelection(items, context) {
     if (context) pageContext = context;
     const current = API.dom.findDiagrams(document);
     if (!current.length) throw new Error("GitHub's rendered Mermaid SVG is not ready");
-    for (let index = 0; index < current.length; index += 1) {
-      await exportOne(current[index], "svg", startIndex + index);
+    for (const item of items) {
+      const svg = current[item.localIndex];
+      if (!svg) throw new Error(`Mermaid diagram ${item.globalIndex} is no longer available`);
+      await exportOne(svg, item.format === "png" ? "png" : "svg", item.globalIndex);
     }
   }
 
@@ -113,21 +116,21 @@
 
   function showError(error, requestId) {
     const message = error?.message || String(error);
-    console.error("GitHub Mermaid Exporter:", error);
+    console.error("gitX Mermaid Exporter:", error);
     showToast(message, true);
     notifyParent({ type: "gme:error", error: message, requestId });
   }
 
   window.addEventListener("message", (event) => {
-    if (event.origin !== GITHUB_ORIGIN || event.source !== window.parent || event.data?.source !== "github-mermaid-exporter") return;
+    if (event.origin !== GITHUB_ORIGIN || event.source !== window.parent || event.data?.source !== CHANNEL) return;
     if (event.data.type === "gme:context") {
       pageContext = event.data.context || {};
       pageStartIndex = Math.max(1, Number(event.data.startIndex) || 1);
     }
     if (event.data.type === "gme:ping") notifyParent({ type: "gme:ready", count: diagrams.length });
-    if (event.data.type === "gme:export-all") {
+    if (event.data.type === "gme:export-selection") {
       const requestId = event.data.requestId;
-      exportAll(Math.max(1, Number(event.data.startIndex) || 1), event.data.context).then(
+      exportSelection(Array.isArray(event.data.items) ? event.data.items : [], event.data.context).then(
         () => notifyParent({ type: "gme:export-complete", requestId }),
         (error) => showError(error, requestId)
       );

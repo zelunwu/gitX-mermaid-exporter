@@ -1,8 +1,8 @@
 {
-  "name": "github-mermaid-exporter",
-  "version": "0.1.0",
+  "name": "gitx-mermaid-exporter",
+  "version": "0.2.0",
   "private": true,
-  "description": "Local tests and packaging for the GitHub Mermaid Exporter extension",
+  "description": "Local tests and packaging for the gitX Mermaid Exporter extension",
   "scripts": {
     "check:manifest": "node scripts/check-manifest.js",
     "check:syntax": "node scripts/check-syntax.js",

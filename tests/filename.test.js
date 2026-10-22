@@ -21,5 +21,5 @@ test("cleans unsafe, reserved, empty, and path-like names", () => {
   assert.equal(filename.sanitizeSegment(" a/b:c*?  diagram "), "a-b-c-diagram");
   assert.equal(filename.sanitizeSegment("CON"), "_CON");
   assert.equal(filename.sanitizeDownloadPath("../../private/repo.svg", "svg"), "repo.svg");
-  assert.equal(filename.makeFilename({}, 0, "exe"), "github-markdown-diagram-01.svg");
+  assert.equal(filename.makeFilename({}, 0, "exe"), "gitX-markdown-diagram-01.svg");
 });
