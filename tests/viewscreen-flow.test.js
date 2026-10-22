@@ -29,7 +29,7 @@ test("local Viewscreen fixture exercises single SVG, PNG, and multi-diagram batc
   });
   const downloads = [];
   const runtimeListeners = [];
-  fixture.window.GitHubMermaidExporter = {
+  fixture.window.GitXMermaidExporter = {
     filename,
     dom: domApi,
     svg: svgApi,
@@ -55,7 +55,7 @@ test("local Viewscreen fixture exercises single SVG, PNG, and multi-diagram batc
     origin: "https://github.com",
     source: fixture.window,
     data: {
-      source: "github-mermaid-exporter",
+      source: "gitx-mermaid-exporter",
       type: "gme:context",
       startIndex: 5,
       context: { repository: "secret-repo", markdownFile: "Design" }
@@ -81,9 +81,13 @@ test("local Viewscreen fixture exercises single SVG, PNG, and multi-diagram batc
     origin: "https://github.com",
     source: fixture.window,
     data: {
-      source: "github-mermaid-exporter",
-      type: "gme:export-all",
-      startIndex: 3,
+      source: "gitx-mermaid-exporter",
+      type: "gme:export-selection",
+      requestId: "fixture-request",
+      items: [
+        { localIndex: 0, globalIndex: 3, format: "svg" },
+        { localIndex: 1, globalIndex: 4, format: "svg" }
+      ],
       context: { repository: "secret-repo", markdownFile: "Design" }
     }
   }));
