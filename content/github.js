@@ -91,7 +91,8 @@
       list.push({
         localIndex: selection.localIndex,
         globalIndex: selection.globalIndex,
-        format: selection.format
+        format: selection.format,
+        scale: selection.scale
       });
       grouped.set(selection.frame, list);
     });
@@ -124,7 +125,11 @@
     const rows = entries.map((entry) => {
       const row = document.createElement("label");
       row.className = "gme-picker-row";
-      row.innerHTML = `<input type="checkbox" checked><span>Diagram ${entry.globalIndex}</span><select aria-label="Format for diagram ${entry.globalIndex}"><option value="svg">SVG</option><option value="png">PNG 2×</option></select>`;
+      row.innerHTML = `<input type="checkbox" checked><span>Diagram ${entry.globalIndex}</span><select aria-label="Format for diagram ${entry.globalIndex}">
+        <option value="svg">SVG</option><option value="png:auto">PNG Auto</option>
+        <option value="png:1">PNG 1×</option><option value="png:2">PNG 2×</option><option value="png:3">PNG 3×</option>
+        <option value="png:4">PNG 4×</option><option value="png:5">PNG 5×</option><option value="png:6">PNG 6×</option>
+      </select>`;
       list.append(row);
       return { entry, row };
     });
@@ -135,10 +140,10 @@
     overlay.addEventListener("keydown", (event) => { if (event.key === "Escape") cancel(); });
     overlay.querySelector(".gme-picker-export").addEventListener("click", async (event) => {
       const button = event.currentTarget;
-      const selections = rows.filter(({ row }) => row.querySelector("input").checked).map(({ entry, row }) => ({
-        ...entry,
-        format: row.querySelector("select").value
-      }));
+      const selections = rows.filter(({ row }) => row.querySelector("input").checked).map(({ entry, row }) => {
+        const [format, scale = "auto"] = row.querySelector("select").value.split(":");
+        return { ...entry, format, scale };
+      });
       if (!selections.length) {
         showToast("Select at least one diagram", true);
         return;

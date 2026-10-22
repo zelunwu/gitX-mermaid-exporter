@@ -20,9 +20,10 @@ test("Viewscreen monitor detects delayed SVG and multiple diagrams", async () =>
   await tick();
   const first = fixture.window.document.createElement("div");
   first.className = "mermaid";
-  first.innerHTML = '<svg viewBox="0 0 100 50"></svg>';
+  first.innerHTML = '<svg viewBox="0 0 100 50"><foreignObject><svg viewBox="0 0 10 10"></svg></foreignObject></svg>';
   fixture.window.document.body.append(first);
   await tick();
+  assert.equal(domApi.findDiagrams(fixture.window.document).length, 1, "nested SVGs are not separate diagrams");
   const second = first.cloneNode(true);
   fixture.window.document.body.append(second);
   await tick();
@@ -41,6 +42,40 @@ test("light and dark Viewscreen fixtures produce the visible background", () => 
   assert.deepEqual(pngApi.dimensions(100.2, 50.2, 2), {
     logicalWidth: 100.2, logicalHeight: 50.2, pixelWidth: 201, pixelHeight: 101
   });
+});
+
+test("adaptive PNG planning removes long-diagram whitespace and chooses a safe readable scale", () => {
+  const plan = pngApi.rasterPlan({
+    width: 900,
+    height: 20000,
+    viewBox: { x: 0, y: 0, width: 100, height: 400 },
+    contentBox: { x: 0, y: 0, width: 40, height: 400 },
+    scale: "auto"
+  });
+  assert.equal(plan.logicalWidth, 900);
+  assert.equal(plan.logicalHeight, 3600);
+  assert.equal(plan.scale, 4);
+  assert.equal(plan.pixelWidth, 3600);
+  assert.equal(plan.pixelHeight, 14400);
+  assert.deepEqual(plan.cropBox, { x: 0, y: 0, width: 100, height: 400 });
+  assert.throws(() => pngApi.rasterPlan({
+    width: 2000, height: 8000, scale: 4
+  }), /choose 2× or lower/);
+});
+
+test("pgir geometry produces the exact GitHub viewBox dimensions", () => {
+  const plan = pngApi.rasterPlan({
+    width: 488,
+    height: 1536,
+    viewBox: { x: -36, y: -36, width: 488, height: 1536 },
+    contentBox: { x: 12, y: 12, width: 392, height: 1440 },
+    scale: "auto"
+  });
+  assert.equal(plan.scale, 6);
+  assert.equal(plan.logicalWidth, 488);
+  assert.equal(plan.logicalHeight, 1536);
+  assert.equal(plan.pixelWidth, 2928);
+  assert.equal(plan.pixelHeight, 9216);
 });
 
 test("GitHub SPA navigation and iframe reload fixtures are rediscovered", async () => {

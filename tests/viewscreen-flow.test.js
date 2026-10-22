@@ -35,7 +35,9 @@ test("local Viewscreen fixture exercises single SVG, PNG, and multi-diagram batc
     svg: svgApi,
     png: {
       ...pngApi,
-      rasterize: async () => "data:image/png;base64,iVBORw0KGgo="
+      rasterize: async () => ({
+        dataUrl: "data:image/png;base64,iVBORw0KGgo=", scale: 4, width: 480, height: 240
+      })
     }
   };
   fixture.window.chrome = {
@@ -85,8 +87,8 @@ test("local Viewscreen fixture exercises single SVG, PNG, and multi-diagram batc
       type: "gme:export-selection",
       requestId: "fixture-request",
       items: [
-        { localIndex: 0, globalIndex: 3, format: "svg" },
-        { localIndex: 1, globalIndex: 4, format: "svg" }
+        { localIndex: 0, globalIndex: 3, format: "svg", scale: "auto" },
+        { localIndex: 1, globalIndex: 4, format: "svg", scale: "auto" }
       ],
       context: { repository: "secret-repo", markdownFile: "Design" }
     }
