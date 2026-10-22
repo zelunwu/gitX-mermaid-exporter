@@ -1,0 +1,23 @@
+{
+  "name": "github-mermaid-exporter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local tests and packaging for the GitHub Mermaid Exporter extension",
+  "scripts": {
+    "check:manifest": "node scripts/check-manifest.js",
+    "check:syntax": "node scripts/check-syntax.js",
+    "test": "node --test tests/*.test.js",
+    "test:chromium": "node tests/chromium.integration.js",
+    "verify": "npm run check:manifest && npm run check:syntax && npm test",
+    "package": "node scripts/package.js"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "jsdom": "^27.0.1",
+    "playwright-core": "^1.64.1",
+    "pngjs": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
