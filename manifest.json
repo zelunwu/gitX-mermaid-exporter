@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "gitX Mermaid Exporter",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Export Mermaid diagrams exactly as rendered by GitHub Viewscreen.",
   "permissions": [
     "downloads"
