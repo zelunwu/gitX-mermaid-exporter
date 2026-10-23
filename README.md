@@ -2,11 +2,11 @@
 
 ## Buy me a coffee
 
-If gitX-mermaid-exporter helps you, you can support future maintenance. Donation codes and links will be added here later:
+If gitX-mermaid-exporter saves you time, you can support its continued maintenance:
 
-- WeChat: `TODO`
-- Alipay: `TODO`
-- PayPal: `TODO`
+| Alipay | WeChat Pay | PayPal |
+| :---: | :---: | :---: |
+| <img src="docs/support/alipay.jpg" alt="Alipay donation QR code" width="220"> | <img src="docs/support/wechat.jpg" alt="WeChat Pay donation QR code" width="220"> | <img src="docs/support/paypal_code.jpg" alt="PayPal donation QR code" width="220"> |
 
 ## What it does
 
