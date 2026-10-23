@@ -49,9 +49,9 @@ test("uses a padded content box to avoid clipping when viewBox is absent", () =>
   source.getBBox = () => ({ x: -5, y: -5, width: 105, height: 45 });
   source.getBoundingClientRect = () => ({ width: 0, height: 0 });
   const result = svgApi.serializeSvg(source, { inlineStyles: false });
-  assert.match(result.text, /viewBox="-7 -7 109 49"/);
-  assert.equal(result.width, 109);
-  assert.equal(result.height, 49);
+  assert.match(result.text, /viewBox="-11 -11 117 57"/);
+  assert.equal(result.width, 117);
+  assert.equal(result.height, 57);
 });
 
 test("never includes exporter UI nested in a source fixture", () => {

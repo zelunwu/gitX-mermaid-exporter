@@ -31,9 +31,9 @@ function fixturePage() {
 }
 
 function viewscreenPage(delayed) {
-  const svg = `<div class="mermaid"><svg viewBox="0 0 100 50" style="display:block;width:240px;height:120px;color:rgb(201,209,217)">
+  const svg = `<div class="mermaid"><svg viewBox="0 0 120 50" style="display:block;width:240px;height:120px;margin:0 175px;color:rgb(201,209,217)">
     <rect x="10" y="10" width="80" height="30" fill="rgb(31,111,235)"/>
-    <foreignObject x="12" y="14" width="76" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="color:rgb(201,209,217);font:8px sans-serif">GitHub native fixture</div></foreignObject>
+    <foreignObject x="12" y="14" width="76" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="width:96px;white-space:nowrap;color:rgb(201,209,217);font:8px sans-serif">GitHub native fixture right-edge overflow<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg></div></foreignObject>
   </svg></div>`;
   return `<!doctype html><html data-color-mode="dark"><body style="margin:0;background:rgb(13,17,23)">
     ${delayed ? `<script>setTimeout(() => document.body.insertAdjacentHTML("beforeend", ${JSON.stringify(svg)}), 400)</script>` : svg}
@@ -104,7 +104,7 @@ async function main() {
     assert.equal(frames.length, 2);
     await first.locator(".gme-toolbar").waitFor();
     await second.locator(".gme-toolbar").waitFor();
-    const svgBounds = await first.locator("svg").boundingBox();
+    const svgBounds = await first.locator(".mermaid > svg").boundingBox();
     const toolbarBounds = await first.locator(".gme-toolbar").boundingBox();
     assert.ok(toolbarBounds.x >= svgBounds.x && toolbarBounds.x <= svgBounds.x + 12, "toolbar should be at the upper-left");
 
@@ -118,17 +118,28 @@ async function main() {
     downloads = await waitForDownloads(worker, 2);
     assert.match(await second.locator(".gme-toast").textContent(), /private-repo-Architecture-diagram-02\.svg/);
 
-    await first.getByRole("button", { name: "PNG 2×" }).click();
+    await first.getByLabel("PNG scale").selectOption("auto");
+    await first.getByRole("button", { name: "PNG", exact: true }).click();
     downloads = await waitForDownloads(worker, 3);
     assert.match(await first.locator(".gme-toast").textContent(), /private-repo-Architecture-diagram-01\.png/);
     const firstThree = downloads.slice(0, 3).map((item) => fs.readFileSync(item.filename));
     const png = firstThree.find((data) => data.subarray(1, 4).toString("ascii") === "PNG");
     assert.ok(png, "a parseable PNG download should exist");
     assert.deepEqual([...png.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
-    assert.equal(png.readUInt32BE(16), 480);
-    assert.equal(png.readUInt32BE(20), 240);
+    assert.equal(png.readUInt32BE(16), 1440);
+    assert.equal(png.readUInt32BE(20), 600, "GitHub viewBox aspect ratio should remove bottom whitespace without clipping branches");
     const decodedPng = PNG.sync.read(png);
     assert.deepEqual([...decodedPng.data.subarray(0, 4)], [13, 17, 23, 255]);
+    const centerOffset = (300 * decodedPng.width + 600) * 4;
+    assert.deepEqual(
+      [...decodedPng.data.subarray(centerOffset, centerOffset + 4)],
+      [31, 111, 235, 255],
+      "GitHub page margins must not shift PNG content or clip its right edge"
+    );
+    for (let y = 0; y < decodedPng.height; y += Math.max(1, Math.floor(decodedPng.height / 20))) {
+      const offset = (y * decodedPng.width + decodedPng.width - 1) * 4;
+      assert.deepEqual([...decodedPng.data.subarray(offset, offset + 4)], [13, 17, 23, 255]);
+    }
 
     const picker = await worker.evaluate(async () => {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -139,7 +150,7 @@ async function main() {
     assert.equal((await worker.evaluate(async () => chrome.downloads.search({}))).length, 3, "opening the picker must not download");
     const pickerRows = page.locator(".gme-picker-row");
     assert.equal(await pickerRows.count(), 2);
-    await pickerRows.nth(1).locator("select").selectOption("png");
+    await pickerRows.nth(1).locator("select").selectOption("png:auto");
     await page.getByRole("button", { name: "Export selected" }).click();
     downloads = await waitForDownloads(worker, 5);
     const svgTexts = downloads

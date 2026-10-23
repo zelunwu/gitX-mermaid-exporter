@@ -26,7 +26,22 @@
   font: inherit;
 }
 
+.gme-toolbar select {
+  border: 1px solid #8c959f;
+  border-radius: 5px;
+  padding: 3px 4px;
+  background: #f6f8fa;
+  color: #24292f;
+  font: inherit;
+}
+
 .gme-toolbar[data-theme="dark"] button {
+  border-color: #6e7681;
+  background: #21262d;
+  color: #f0f6fc;
+}
+
+.gme-toolbar[data-theme="dark"] select {
   border-color: #6e7681;
   background: #21262d;
   color: #f0f6fc;

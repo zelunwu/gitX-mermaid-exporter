@@ -24,15 +24,29 @@
     return button;
   }
 
+  function makeScaleSelect() {
+    const select = document.createElement("select");
+    select.className = "gme-scale";
+    select.title = "PNG scale";
+    select.setAttribute("aria-label", "PNG scale");
+    select.innerHTML = `
+      <option value="auto">Auto</option>
+      <option value="1">1×</option><option value="2">2×</option><option value="3">3×</option>
+      <option value="4">4×</option><option value="5">5×</option><option value="6">6×</option>`;
+    return select;
+  }
+
   function createToolbar(svg) {
     const toolbar = document.createElement("div");
     toolbar.className = "gme-toolbar";
     toolbar.dataset.gmeUi = "true";
     toolbar.setAttribute("role", "group");
     toolbar.setAttribute("aria-label", "Export Mermaid diagram");
+    const scale = makeScaleSelect();
     toolbar.append(
       makeButton("SVG", "Export this GitHub-rendered SVG", () => exportOne(svg, "svg", diagramIndex(svg))),
-      makeButton("PNG 2×", "Export this diagram as a 2× PNG", () => exportOne(svg, "png", diagramIndex(svg)))
+      makeButton("PNG", "Export this diagram as PNG", () => exportOne(svg, "png", diagramIndex(svg), scale.value)),
+      scale
     );
     document.documentElement.append(toolbar);
     toolbars.set(svg, toolbar);
@@ -73,24 +87,27 @@
     notifyParent({ type: "gme:ready", count: diagrams.length });
   }
 
-  async function exportOne(svg, format, index) {
+  async function exportOne(svg, format, index, scale = "auto") {
     if (!svg?.isConnected) throw new Error("GitHub's rendered Mermaid SVG is no longer available");
     const serialized = API.svg.serializeSvg(svg);
     const filename = API.filename.makeFilename(pageContext, index, format);
-    const dataUrl = format === "png"
+    const png = format === "png"
       ? await API.png.rasterize(serialized.text, {
           document,
           width: serialized.width,
           height: serialized.height,
+          viewBox: serialized.viewBox,
+          contentBox: serialized.contentBox,
           background: API.png.backgroundFor(svg),
-          scale: 2
+          scale
         })
-      : API.svg.toSvgDataUrl(serialized.text);
+      : null;
+    const dataUrl = png?.dataUrl || API.svg.toSvgDataUrl(serialized.text);
     const response = await chrome.runtime.sendMessage({
       type: "gme:download", format, filename, dataUrl
     });
     if (!response?.ok) throw new Error(response?.error || "Chrome could not start the download");
-    showToast(`Download started: ${filename}`);
+    showToast(`Download started: ${filename}${png ? ` (${png.scale}×, ${png.width}×${png.height})` : ""}`);
   }
 
   async function exportSelection(items, context) {
@@ -100,7 +117,7 @@
     for (const item of items) {
       const svg = current[item.localIndex];
       if (!svg) throw new Error(`Mermaid diagram ${item.globalIndex} is no longer available`);
-      await exportOne(svg, item.format === "png" ? "png" : "svg", item.globalIndex);
+      await exportOne(svg, item.format === "png" ? "png" : "svg", item.globalIndex, item.scale);
     }
   }
 

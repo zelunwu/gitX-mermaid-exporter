@@ -3,12 +3,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const archiver = require("archiver");
+const runtimeFiles = require("./runtime-files.js");
 
 const root = path.resolve(__dirname, "..");
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8"));
 const dist = path.join(root, "dist");
 const output = path.join(dist, `gitX-mermaid-exporter-v${manifest.version}.zip`);
-const runtimeFiles = ["manifest.json", "service-worker.js", "lib", "content", "LICENSE"];
 fs.mkdirSync(dist, { recursive: true });
 fs.rmSync(output, { force: true });
 
