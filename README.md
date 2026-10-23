@@ -18,6 +18,24 @@ gitX-mermaid-exporter is a small Chrome Manifest V3 extension that exports Merma
 - Filenames use `repository-Markdown-file-diagram-index.svg|png`, with safe fallbacks.
 - Download and rendering failures are shown in the page and on the extension action badge instead of failing silently.
 
+## Live demo
+
+GitHub renders the diagram below. After installing the extension, use the controls at its upper-left corner to export it, or click the extension toolbar icon to include it in a batch export.
+
+```mermaid
+flowchart LR
+    markdown["GitHub Markdown"] -->|"GitHub renders"| viewscreen["Viewscreen SVG"]
+    viewscreen --> exporter{"gitX Mermaid Exporter"}
+    exporter --> svg["Native SVG"]
+    exporter --> png["Adaptive PNG"]
+    exporter --> batch["Selected batch"]
+    svg --> downloads[("Local downloads")]
+    png --> downloads
+    batch --> downloads
+```
+
+The extension reads this already-rendered SVG in the browser. It does not rerun Mermaid or upload the diagram, Markdown, or repository content.
+
 ## Permissions and privacy
 
 The extension requests only:
