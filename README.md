@@ -30,7 +30,7 @@ There is no `<all_urls>`, remote code, CDN, telemetry, analytics, account system
 
 ## Install and use
 
-1. Download and unzip `gitX-mermaid-exporter-v0.3.2.zip`, or use the repository root. A packed `.crx` is also attached to releases for Chrome environments that permit off-store CRX installation.
+1. Download and unzip `gitX-mermaid-exporter-v0.3.3.zip`, or use the repository root. A packed `.crx` is also attached to releases for Chrome environments that permit off-store CRX installation.
 2. Open `chrome://extensions` and enable **Developer mode**.
 3. Choose **Load unpacked** and select the extracted directory.
 4. Open a GitHub Markdown page containing Mermaid diagrams.
