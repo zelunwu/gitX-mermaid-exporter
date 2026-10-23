@@ -39,7 +39,19 @@ assert.ok(!JSON.stringify(manifest).includes("<all_urls>"));
 
 const referenced = [
   manifest.background.service_worker,
-  ...manifest.content_scripts.flatMap((entry) => [...entry.js, ...(entry.css || [])])
+  ...manifest.content_scripts.flatMap((entry) => [...entry.js, ...(entry.css || [])]),
+  ...Object.values(manifest.icons || {}),
+  ...Object.values(manifest.action?.default_icon || {})
 ];
 for (const file of referenced) assert.ok(fs.existsSync(path.join(root, file)), `Missing ${file}`);
+
+const expectedIcons = { 16: "icons/icon-16.png", 32: "icons/icon-32.png", 48: "icons/icon-48.png", 128: "icons/icon-128.png" };
+assert.deepEqual(manifest.icons, expectedIcons);
+assert.deepEqual(manifest.action.default_icon, expectedIcons);
+for (const [size, file] of Object.entries(expectedIcons)) {
+  const png = fs.readFileSync(path.join(root, file));
+  assert.equal(png.toString("hex", 0, 8), "89504e470d0a1a0a", `${file} is not a PNG`);
+  assert.equal(png.readUInt32BE(16), Number(size), `${file} has the wrong width`);
+  assert.equal(png.readUInt32BE(20), Number(size), `${file} has the wrong height`);
+}
 console.log("manifest.json is valid and uses the expected minimal permissions");

@@ -23,4 +23,4 @@
 
 "use strict";
 
-module.exports = ["manifest.json", "service-worker.js", "lib", "content", "LICENSE"];
+module.exports = ["manifest.json", "service-worker.js", "lib", "content", "icons", "LICENSE"];
