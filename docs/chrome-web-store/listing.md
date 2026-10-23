@@ -52,11 +52,33 @@ Discovers GitHub Viewscreen diagram frames, reads current-page repository and Ma
 
 Reads Mermaid SVGs already rendered by GitHub Viewscreen and adds per-diagram export controls. Diagram content is processed locally and is not transmitted externally.
 
+**Remote code**
+
+This extension does not use remote code. All executable JavaScript and CSS are bundled inside the extension package. It does not load scripts from a CDN or external service and does not use `eval`, `new Function`, or remotely hosted WebAssembly.
+
 ### Data handling disclosure
 
 The extension handles website content and the current GitHub page URL locally to provide its export feature. It does not collect data on a developer-operated server, transmit data to third parties, retain browsing activity, sell data, use data for advertising, or allow human access to repository content.
 
 Certify in the dashboard that data use is limited to the disclosed single purpose, is not sold or transferred, is not used for unrelated purposes or creditworthiness, and complies with the Chrome Web Store User Data Policy.
+
+## Dashboard completion checklist
+
+On the **Privacy practices** tab:
+
+1. Enter the single-purpose description above.
+2. Paste the `downloads` justification above.
+3. Paste both GitHub origins and their purposes into the host-permission justification.
+4. State that the extension does not use remote code and paste the remote-code explanation above.
+5. Disclose that website content and the current GitHub page URL are handled locally; no data is transmitted or retained.
+6. Complete every applicable Developer Program Policies data-use certification.
+7. Select **Save Draft**.
+
+On the dashboard **Settings** page:
+
+1. Enter a monitored publisher contact email.
+2. Start email verification and open the verification link sent by Google.
+3. Return to the dashboard and confirm that the address is shown as verified.
 
 ## Distribution
 
