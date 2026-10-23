@@ -46,6 +46,8 @@ The extension requests only:
 
 There is no `<all_urls>`, remote code, CDN, telemetry, analytics, account system, external API, or upload path. Markdown, SVG, PNG, and private-repository content stay in the browser. The extension reuses the browser's existing GitHub session and never reads or stores credentials.
 
+See the complete [Privacy Policy](PRIVACY.md).
+
 ## Install and use
 
 1. Download and unzip `gitX-mermaid-exporter-v0.3.3.zip`, or use the repository root. A packed `.crx` is also attached to releases for Chrome environments that permit off-store CRX installation.
